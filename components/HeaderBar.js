@@ -35,7 +35,7 @@ export default function HeaderBar({
 
 const styles = StyleSheet.create({
   safe: {
-    backgroundColor: "#070B16", // สีพื้นหลังเดียวกับหน้า
+    backgroundColor: "#0B1220", // สีพื้นหลังเดียวกับหน้า
   },
   container: {
     paddingTop: 10, // คุมระยะด้านในแทน marginTop
