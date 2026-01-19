@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import ScanCamera from "../components/ScanCamera";
-import { myStyle } from "../style/myStyle";
+import { styles as myStyle } from "../styles/myStyle";
 
 export default function Login({ navigation }) {
   const [mode, setMode] = useState("login");
@@ -29,17 +29,15 @@ export default function Login({ navigation }) {
 
     setScanned(true);
     console.log("Student ID:", data);
-
-    // mock login (ยังไม่เชื่อม backend / firebase)
     navigation.replace("Dashboard");
   };
 
-  /* ================= SCAN MODE ================= */
+  // ================= SCAN MODE =================
   if (mode === "scan") {
     if (!permission) {
       return (
-        <View style={styles.permissionBox}>
-          <Text style={styles.permissionText}>
+        <View style={loginStyles.permissionBox}>
+          <Text style={loginStyles.permissionText}>
             Loading camera permission...
           </Text>
         </View>
@@ -85,7 +83,7 @@ export default function Login({ navigation }) {
     );
   }
 
-  /* ================= LOGIN MODE ================= */
+  // ================= LOGIN MODE =================
   return (
     <ScrollView
       style={myStyle.container}
@@ -143,7 +141,7 @@ export default function Login({ navigation }) {
         </View>
       </View>
 
-      <Text style={[styles.footerNote, { marginTop: 20 }]}>
+      <Text style={[loginStyles.footerNote, { marginTop: 20 }]}>
         Note: Scanner is on the bike — app shows status & logs for complete
         system.
       </Text>
@@ -151,8 +149,8 @@ export default function Login({ navigation }) {
   );
 }
 
-/* ================= STYLES ================= */
-const styles = StyleSheet.create({
+/* ================= LOCAL STYLES ================= */
+const loginStyles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     marginTop: 60,
