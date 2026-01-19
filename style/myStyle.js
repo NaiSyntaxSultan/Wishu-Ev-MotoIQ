@@ -1,99 +1,131 @@
 import { StyleSheet } from "react-native";
 
 export const myStyle = StyleSheet.create({
-    
+  /* =====================
+     Global
+  ===================== */
   container: {
     flex: 1,
-    backgroundColor: "#060B16",
-    paddingHorizontal: 18,
-    paddingTop: 24,
+    backgroundColor: "#0B1220",
   },
 
-  headerWrap: {
-    marginBottom: 18,
-  },
-  textHeader: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: "#EAF0FF",
-  },
-  textSubHeader: {
-    marginTop: 6,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#7C8DB5",
-  },
-
-  // ===== Card / Panel =====
   card: {
-    backgroundColor: "#0B1326", // ✅ ตามที่ต้องการ
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: "#141C2F",
-    padding: 18,
-    marginBottom: 14,
+    backgroundColor: "#121C2E",
+    borderRadius: 20,
+    padding: 20,
+    marginVertical: 10,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#EAF0FF",
-    marginBottom: 8,
+
+  /* =====================
+     Text
+  ===================== */
+  textheader: {
+    position: "absolute",
+    top: 80,
+    alignSelf: "center",
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#FFFFFF",
   },
-  text: {
+
+  subtitle: {
+    alignSelf: "center",
+    marginTop: 130,
     fontSize: 14,
-    fontWeight: "500",
-    color: "#B8C4E6",
-  },
-  caption: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#7C8DB5",
+    color: "#9AA4BF",
   },
 
-  // ===== Button =====
-  btnPrimary: {
-    backgroundColor: "#2CE6A0",
-    borderRadius: 999,
-    paddingVertical: 14,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 10,
+  },
+
+  /* =====================
+     Input (คล้ายของเดิม)
+  ===================== */
+  inputContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-  },
-  btnPrimaryText: {
-    color: "#08101A",
-    fontSize: 16,
-    fontWeight: "900",
+    alignSelf: "center",
+    marginTop: 40,
+    width: 300,
+    height: 48,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#1B263B",
   },
 
-  btnSecondary: {
-    backgroundColor: "#111A2E",
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#1A2440",
-    paddingVertical: 14,
+  inputContainer2: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-  },
-  btnSecondaryText: {
-    color: "#EAF0FF",
-    fontSize: 16,
-    fontWeight: "800",
+    alignSelf: "center",
+    marginTop: 20,
+    width: 300,
+    height: 48,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#1B263B",
   },
 
-  // ===== Input (ใช้หน้า login/signup/profile ได้) =====
-  input: {
-    width: "100%",
-    height: 46,
+  iconBox: {
+    backgroundColor: "#26344F",
+    width: 48,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  textInput: {
+    flex: 1,
+    paddingLeft: 12,
+    height: "100%",
+    color: "#FFFFFF",
+    backgroundColor: "#1B263B",
+  },
+
+  eyeIcon: {
+    padding: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1B263B",
+    height: "100%",
+  },
+
+  /* =====================
+     Button
+  ===================== */
+  buttonPrimary: {
+    alignSelf: "center",
+    marginTop: 30,
+    width: 300,
+    paddingVertical: 16,
     borderRadius: 16,
-    paddingHorizontal: 14,
-    color: "#EAF0FF",
-    backgroundColor: "#0A1122",
-    borderWidth: 1,
-    borderColor: "#1A2440",
+    backgroundColor: "#35E1A1",
+    alignItems: "center",
   },
 
-  pillText: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#EAF0FF",
+  buttonPrimaryText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0B1220",
+  },
+
+  buttonSecondary: {
+    alignSelf: "center",
+    marginTop: 16,
+    width: 300,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#35E1A1",
+    alignItems: "center",
+  },
+
+  buttonSecondaryText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#35E1A1",
   },
 });
