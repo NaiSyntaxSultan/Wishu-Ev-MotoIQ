@@ -1,18 +1,31 @@
 import { StyleSheet } from "react-native";
 
-export const myStyle = StyleSheet.create({
+export const styles = StyleSheet.create({
+  /* ================= BASE ================= */
   container: {
     flex: 1,
     backgroundColor: "#0B1220",
   },
 
-  card: {
-    backgroundColor: "#121C2E",
-    borderRadius: 20,
-    padding: 20,
-    marginVertical: 10,
+  content: {
+    paddingHorizontal: 16,
+    paddingBottom: 120,
   },
 
+  card: {
+    backgroundColor: "#121C2E",
+    borderRadius: 28,
+    padding: 24,
+    marginBottom: 20,
+  },
+
+  row: {
+    flexDirection: "row",
+    gap: 14,
+    marginTop: 20,
+  },
+
+  /* ================= HEADER ================= */
   textheader: {
     position: "absolute",
     top: 80,
@@ -29,6 +42,7 @@ export const myStyle = StyleSheet.create({
     color: "#9AA4BF",
   },
 
+  /* ================= SECTION ================= */
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
@@ -36,6 +50,26 @@ export const myStyle = StyleSheet.create({
     marginBottom: 10,
   },
 
+  bigText: {
+    fontSize: 38,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginBottom: 6,
+  },
+
+  desc: {
+    fontSize: 14,
+    color: "#9AA4BF",
+    lineHeight: 20,
+  },
+
+  info: {
+    fontSize: 14,
+    color: "#9AA4BF",
+    lineHeight: 20,
+  },
+
+  /* ================= INPUT (เดิม) ================= */
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -84,6 +118,7 @@ export const myStyle = StyleSheet.create({
     height: "100%",
   },
 
+  /* ================= BUTTON ================= */
   buttonPrimary: {
     alignSelf: "center",
     marginTop: 30,

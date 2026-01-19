@@ -1,13 +1,11 @@
-import React from "react";
-import { View, Text } from "react-native";
-import { myStyle } from "../style/myStyle";
+import { Text, View } from "react-native";
+import BottomNavBar from "../components/BottomNavBar";
 
-export default function GpsTracking() {
+export default function GpsTracking({ navigation }) {
   return (
     <View style={myStyle.container}>
-      <Text style={{ color: "#FFFFFF", fontSize: 20 }}>
-        GPS Tracking
-      </Text>
+      <Text style={{ color: "#fff", fontSize: 20 }}>GPS Tracking</Text>
+      <BottomNavBar active="Map" navigation={navigation} />
     </View>
   );
 }
