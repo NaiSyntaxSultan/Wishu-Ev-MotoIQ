@@ -1,9 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const myStyle = StyleSheet.create({
-  /* =====================
-     Global
-  ===================== */
   container: {
     flex: 1,
     backgroundColor: "#0B1220",
@@ -16,9 +13,6 @@ export const myStyle = StyleSheet.create({
     marginVertical: 10,
   },
 
-  /* =====================
-     Text
-  ===================== */
   textheader: {
     position: "absolute",
     top: 80,
@@ -42,9 +36,6 @@ export const myStyle = StyleSheet.create({
     marginBottom: 10,
   },
 
-  /* =====================
-     Input (คล้ายของเดิม)
-  ===================== */
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -93,9 +84,6 @@ export const myStyle = StyleSheet.create({
     height: "100%",
   },
 
-  /* =====================
-     Button
-  ===================== */
   buttonPrimary: {
     alignSelf: "center",
     marginTop: 30,
