@@ -13,15 +13,8 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 2. Start the app
 
    ```bash
-   npx start
+   npx expo start
    ```
-   
-   
-   
-   npx expo install expo-image-picker
-   npm install expo-barcode-scanner
-   npx expo install expo-camera
-   npx expo install @expo/vector-icons
 
 In the output, you'll find options to open the app in a
 

@@ -1,14 +1,13 @@
-import React from "react";
-import { StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StatusBar } from "react-native";
 
-import Login from "./screen/login";
-import SmartDashboard from "./screen/smartDashboard";
 import DrivingMode from "./screen/drivingMode";
-import HealthAndAlerts from "./screen/healthAndAlerts";
 import GpsTracking from "./screen/gpsTracking";
+import HealthAndAlerts from "./screen/healthAndAlerts";
+import Login from "./screen/login";
 import ProfileAndPrivacy from "./screen/profileAndPrivacy";
+import SmartDashboard from "./screen/smartDashboard";
 
 const Stack = createNativeStackNavigator();
 
