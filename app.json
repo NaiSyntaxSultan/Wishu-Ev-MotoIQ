@@ -46,8 +46,6 @@
       "expo-barcode-scanner"
     ],
 
-      ]
-    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
