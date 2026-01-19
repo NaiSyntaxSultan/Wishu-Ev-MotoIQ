@@ -48,20 +48,20 @@ export default function Login({ navigation }) {
 
     if (!permission.granted) {
       return (
-        <View style={styles.permissionBox}>
-          <Text style={styles.permissionText}>
+        <View style={loginStyles.permissionBox}>
+          <Text style={loginStyles.permissionText}>
             Camera permission is required
           </Text>
 
           <TouchableOpacity
-            style={styles.permissionBtn}
+            style={loginStyles.permissionBtn}
             onPress={requestPermission}
           >
-            <Text style={styles.permissionBtnText}>Grant Permission</Text>
+            <Text style={loginStyles.permissionBtnText}>Grant Permission</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.permissionCancel}
+            style={loginStyles.permissionCancel}
             onPress={() => {
               setScanned(false);
               setMode("login");
@@ -93,14 +93,14 @@ export default function Login({ navigation }) {
       showsVerticalScrollIndicator={false}
     >
       {/* LOGO */}
-      <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>WISHU</Text>
-        <Text style={styles.logoSub}>EV-MotoIQ • Digital Key</Text>
+      <View style={loginStyles.logoContainer}>
+        <Text style={loginStyles.logoText}>WISHU</Text>
+        <Text style={loginStyles.logoSub}>EV-MotoIQ • Digital Key</Text>
       </View>
 
       {/* MAIN CARD */}
-      <View style={styles.mainCard}>
-        <View style={styles.cameraIcon}>
+      <View style={loginStyles.mainCard}>
+        <View style={loginStyles.cameraIcon}>
           <Ionicons name="camera" size={34} color="#35E1A1" />
         </View>
 
@@ -116,28 +116,30 @@ export default function Login({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.descText}>
+        <Text style={loginStyles.descText}>
           Tap to open camera and scan your student barcode
         </Text>
-        <Text style={styles.descSub}>
+        <Text style={loginStyles.descSub}>
           If authorized → unlock bike → go to Dashboard
         </Text>
       </View>
 
       {/* HOW IT WORKS */}
-      <View style={styles.howCard}>
-        <Text style={styles.howTitle}>How it works</Text>
+      <View style={loginStyles.howCard}>
+        <Text style={loginStyles.howTitle}>How it works</Text>
 
-        <View style={styles.stepItem}>
-          <Text style={styles.stepText}>1) Scan Student ID</Text>
+        <View style={loginStyles.stepItem}>
+          <Text style={loginStyles.stepText}>1) Scan Student ID</Text>
         </View>
 
-        <View style={styles.stepItem}>
-          <Text style={styles.stepText}>2) Verify access (database)</Text>
+        <View style={loginStyles.stepItem}>
+          <Text style={loginStyles.stepText}>2) Verify access (database)</Text>
         </View>
 
-        <View style={styles.stepItem}>
-          <Text style={styles.stepText}>3) Unlock / Start → Dashboard</Text>
+        <View style={loginStyles.stepItem}>
+          <Text style={loginStyles.stepText}>
+            3) Unlock / Start → Dashboard
+          </Text>
         </View>
       </View>
 
