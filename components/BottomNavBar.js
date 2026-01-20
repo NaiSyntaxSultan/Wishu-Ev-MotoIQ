@@ -4,6 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 export default function BottomNavBar({ active, navigation }) {
   const tabs = [
     { key: "Dashboard", icon: "speedometer", screen: "Dashboard" },
+    { key: "Eco", icon: "leaf", screen: "DrivingMode" },
     { key: "Map", icon: "map", screen: "GPS" },
     { key: "Alerts", icon: "alert-circle", screen: "Alerts" },
     { key: "More", icon: "menu", screen: "Profile" },
@@ -13,16 +14,18 @@ export default function BottomNavBar({ active, navigation }) {
     <View style={styles.container}>
       {tabs.map((t) => {
         const isActive = active === t.key;
+
         return (
           <TouchableOpacity
             key={t.key}
             style={styles.item}
             onPress={() => navigation.navigate(t.screen)}
+            activeOpacity={0.8}
           >
             <Ionicons
               name={t.icon}
               size={22}
-              color={isActive ? "#4DB6FF" : "#6C7A99"}
+              color={isActive ? "#35E1A1" : "#6C7A99"} // 🌿 Eco ใช้เขียว
             />
             <Text style={[styles.label, isActive && styles.active]}>
               {t.key}
@@ -48,6 +51,7 @@ const styles = StyleSheet.create({
   },
   item: {
     alignItems: "center",
+    minWidth: 60,
   },
   label: {
     color: "#6C7A99",
