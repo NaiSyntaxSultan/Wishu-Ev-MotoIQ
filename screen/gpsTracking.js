@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 import {
-  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,7 +19,7 @@ import MiniCard from "../components/MiniCard";
 const toRad = (v) => (v * Math.PI) / 180;
 
 const calcDistance = (a, b) => {
-  const R = 6371; // km
+  const R = 6371;
   const dLat = toRad(b.latitude - a.latitude);
   const dLon = toRad(b.longitude - a.longitude);
   const lat1 = toRad(a.latitude);
@@ -33,26 +32,11 @@ const calcDistance = (a, b) => {
   return R * (2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)));
 };
 
-/* ================= DARK MAP STYLE ================= */
+/* ================= MAP STYLE ================= */
 const darkMapStyle = [
   { elementType: "geometry", stylers: [{ color: "#0B1220" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#8FA2C9" }] },
   { elementType: "labels.text.stroke", stylers: [{ color: "#0B1220" }] },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#141E30" }],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#8FA2C9" }],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#060B16" }],
-  },
 ];
 
 /* ================= SCREEN ================= */
@@ -65,14 +49,13 @@ export default function GPSTracking({ navigation }) {
   const [distance, setDistance] = useState(0);
   const [history, setHistory] = useState([]);
 
+  const [expandedTripId, setExpandedTripId] = useState(null);
+
   /* ================= PERMISSION ================= */
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("GPS permission denied");
-        return;
-      }
+      if (status !== "granted") return;
 
       const loc = await Location.getCurrentPositionAsync({});
       setLocation(loc.coords);
@@ -112,9 +95,7 @@ export default function GPSTracking({ navigation }) {
       );
     }
 
-    return () => {
-      if (subscription) subscription.then((s) => s.remove());
-    };
+    return () => subscription && subscription.then((s) => s.remove());
   }, [tracking]);
 
   /* ================= STORAGE ================= */
@@ -157,10 +138,7 @@ export default function GPSTracking({ navigation }) {
         subtitle="My bike location • Route history"
       />
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         {/* MAP */}
         <MapView
           ref={mapRef}
@@ -174,7 +152,6 @@ export default function GPSTracking({ navigation }) {
           }}
         >
           <Marker coordinate={location} />
-
           {route.length > 1 && (
             <Polyline
               coordinates={route}
@@ -190,17 +167,14 @@ export default function GPSTracking({ navigation }) {
           <MiniCard title="Distance" value={`${distance.toFixed(2)} km`} />
         </View>
 
-        {/* CONTROLS */}
+        {/* CONTROL */}
         <Card style={{ marginHorizontal: 16, marginTop: 20 }}>
           <TouchableOpacity
             style={[
               styles.btn,
               { backgroundColor: tracking ? "#FF3B30" : "#35E1A1" },
             ]}
-            onPress={() => {
-              if (tracking) saveTrip();
-              else setTracking(true);
-            }}
+            onPress={() => (tracking ? saveTrip() : setTracking(true))}
           >
             <Text style={styles.btnText}>
               {tracking ? "Stop & Save Trip" : "Start Tracking"}
@@ -212,17 +186,62 @@ export default function GPSTracking({ navigation }) {
         <Card style={{ marginHorizontal: 16 }}>
           <Text style={styles.sectionTitle}>Trip History</Text>
 
-          <FlatList
-            data={history}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <View style={styles.tripItem}>
-                <Text style={styles.tripText}>{item.date}</Text>
-                <Text style={styles.tripKm}>{item.distance} km</Text>
+          {history.map((trip) => {
+            const expanded = expandedTripId === trip.id;
+            const start = trip.route[0];
+            const end = trip.route[trip.route.length - 1];
+
+            return (
+              <View key={trip.id} style={{ marginBottom: 12 }}>
+                <TouchableOpacity
+                  onPress={() => setExpandedTripId(expanded ? null : trip.id)}
+                >
+                  <View style={styles.tripCard}>
+                    <View>
+                      <Text style={styles.tripDate}>{trip.date}</Text>
+                      <Text style={styles.tripSub}>
+                        {expanded ? "Tap to close" : "Tap to view detail"}
+                      </Text>
+                    </View>
+                    <Text style={styles.tripKm}>{trip.distance} km</Text>
+                  </View>
+                </TouchableOpacity>
+
+                {expanded && (
+                  <View style={styles.tripDetail}>
+                    <MapView
+                      style={styles.tripMap}
+                      customMapStyle={darkMapStyle}
+                      initialRegion={{
+                        latitude: start.latitude,
+                        longitude: start.longitude,
+                        latitudeDelta: 0.02,
+                        longitudeDelta: 0.02,
+                      }}
+                      pointerEvents="none"
+                    >
+                      <Marker coordinate={start} pinColor="green" />
+                      <Marker coordinate={end} pinColor="red" />
+                      <Polyline
+                        coordinates={trip.route}
+                        strokeColor="#35E1A1"
+                        strokeWidth={3}
+                      />
+                    </MapView>
+
+                    <View style={styles.tripSummary}>
+                      <Text style={styles.summaryText}>
+                        Distance: {trip.distance} km
+                      </Text>
+                      <Text style={styles.summaryText}>
+                        Route Points: {trip.route.length}
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
-            )}
-          />
+            );
+          })}
         </Card>
       </ScrollView>
 
@@ -233,56 +252,50 @@ export default function GPSTracking({ navigation }) {
 
 /* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B0F1A",
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#10182A ",
-  },
-  map: {
-    height: 320,
-    marginHorizontal: 16,
-    borderRadius: 20,
-  },
+  container: { flex: 1, backgroundColor: "#0B0F1A" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  map: { height: 320, margin: 16, borderRadius: 20 },
   infoRow: {
     flexDirection: "row",
     gap: 12,
     paddingHorizontal: 16,
     marginTop: 12,
   },
+
   btn: {
     height: 48,
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
   },
-  btnText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+  btnText: { color: "#000", fontSize: 16, fontWeight: "700" },
+
   sectionTitle: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 12,
   },
-  tripItem: {
+
+  tripCard: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#1E2A44",
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: "#10182A",
   },
-  tripText: {
-    color: "#9AA4BF",
+  tripDate: { color: "#EAF0FF", fontWeight: "600" },
+  tripSub: { color: "#8A94B8", fontSize: 12, marginTop: 4 },
+  tripKm: { color: "#35E1A1", fontWeight: "700", fontSize: 16 },
+
+  tripDetail: {
+    marginTop: 10,
+    backgroundColor: "#0E1627",
+    borderRadius: 18,
+    overflow: "hidden",
   },
-  tripKm: {
-    color: "#35E1A1",
-    fontWeight: "700",
-  },
+  tripMap: { height: 160, width: "100%" },
+  tripSummary: { padding: 12 },
+  summaryText: { color: "#8A94B8", fontSize: 13 },
 });
