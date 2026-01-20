@@ -9,9 +9,17 @@ import Login from "./screen/login";
 import ProfileAndPrivacy from "./screen/profileAndPrivacy";
 import SmartDashboard from "./screen/smartDashboard";
 
+import { useEffect } from "react";
+import { initDB } from "./services/sqlite-service";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+    console.log("Start App");
+    initDB();
+  }, []);
+
   return (
     <NavigationContainer>
       <StatusBar barStyle="light-content" />
