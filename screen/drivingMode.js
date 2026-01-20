@@ -1,5 +1,13 @@
-import { useRef, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { styles as myStyle } from "../styles/myStyle";
 
 import BottomNavBar from "../components/BottomNavBar";
@@ -24,47 +32,140 @@ export default function DrivingMode({ navigation }) {
   const [holding, setHolding] = useState(false);
   const holdTimer = useRef(null);
 
+  /* ===== ANIMATED VALUES ===== */
+  const breathe = useRef(new Animated.Value(0)).current;
+  const pressScale = useRef(new Animated.Value(1)).current;
+  const glow = useRef(new Animated.Value(0)).current;
+
   const theme = MODE_THEME[mode];
+
+  /* ===== IDLE BREATHING ===== */
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(breathe, {
+          toValue: 1,
+          duration: 2500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(breathe, {
+          toValue: 0,
+          duration: 2500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
 
   /* ===== HOLD LOGIC ===== */
   const handlePressIn = () => {
     setHolding(true);
+
+    Animated.parallel([
+      Animated.spring(pressScale, {
+        toValue: 0.92,
+        useNativeDriver: true,
+      }),
+      Animated.timing(glow, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     holdTimer.current = setTimeout(() => {
-      setMode((prev) => (prev === "ECO" ? "MANUAL" : "ECO"));
-      setHolding(false);
+      switchMode();
     }, 1000);
   };
 
   const handlePressOut = () => {
     setHolding(false);
+
+    Animated.parallel([
+      Animated.spring(pressScale, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      Animated.timing(glow, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     if (holdTimer.current) {
       clearTimeout(holdTimer.current);
       holdTimer.current = null;
     }
   };
 
+  /* ===== SWITCH MODE FEEDBACK ===== */
+  const switchMode = () => {
+    Animated.sequence([
+      Animated.spring(pressScale, {
+        toValue: 1.1,
+        useNativeDriver: true,
+      }),
+      Animated.spring(pressScale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setMode((prev) => (prev === "ECO" ? "MANUAL" : "ECO"));
+    setHolding(false);
+  };
+
+  /* ===== DERIVED STYLES ===== */
+  const ringScale = breathe.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.03],
+  });
+
+  const glowOpacity = glow.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 1],
+  });
+
   return (
     <View style={myStyle.container}>
-      {/* ===== HEADER BAR ===== */}
-      <HeaderBar title="Driving Mode" subtitle="Tap the button to toggle" />
+      <HeaderBar title="Driving Mode" subtitle="Hold to switch mode" />
 
       {/* ===== SWITCH BUTTON ===== */}
-      <Pressable
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={[local.glow, { shadowColor: theme.color }]}
-      >
-        <View style={[local.ring, { borderColor: theme.color }]}>
-          <Image
-            source={require("../assets/Eco.png")}
-            style={[local.icon, { tintColor: theme.color }]}
-            resizeMode="contain"
-          />
-        </View>
+      <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
+        <Animated.View
+          style={[
+            local.glow,
+            {
+              shadowColor: theme.color,
+              shadowOpacity: glowOpacity,
+              transform: [{ scale: ringScale }],
+            },
+          ]}
+        >
+          <Animated.View
+            style={[
+              local.ring,
+              {
+                borderColor: theme.color,
+                transform: [{ scale: pressScale }],
+              },
+            ]}
+          >
+            <Image
+              source={require("../assets/Eco.png")}
+              style={[local.icon, { tintColor: theme.color }]}
+              resizeMode="contain"
+            />
+          </Animated.View>
 
-        <Text style={local.tapText}>
-          {holding ? "HOLDING..." : "TAP TO SWITCH"}
-        </Text>
+          <Text style={local.tapText}>
+            {holding ? "HOLDING..." : "TAP TO SWITCH"}
+          </Text>
+        </Animated.View>
       </Pressable>
 
       {/* ===== MODE INFO ===== */}
@@ -75,24 +176,17 @@ export default function DrivingMode({ navigation }) {
         <Text style={local.modeDesc}>{theme.desc}</Text>
       </View>
 
-      {/* ===== MOCK INFO ===== */}
-      <View style={local.mockBox}>
-        <Text style={local.mockText}>Haptic: vibrate on tap</Text>
-      </View>
-
-      {/* ===== BOTTOM NAVBAR ===== */}
       <BottomNavBar active="Eco" navigation={navigation} />
     </View>
   );
 }
 
-/* ===== LOCAL STYLES ===== */
+/* ===== STYLES ===== */
 const local = StyleSheet.create({
   glow: {
     alignSelf: "center",
     marginTop: 40,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
     shadowRadius: 40,
   },
   ring: {
@@ -104,13 +198,11 @@ const local = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#0B0F1A",
   },
-
   icon: {
     width: 140,
     height: 140,
     opacity: 0.95,
   },
-
   tapText: {
     position: "absolute",
     bottom: 24,
@@ -119,7 +211,6 @@ const local = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 1,
   },
-
   infoWrap: {
     marginTop: 40,
     alignItems: "center",
@@ -134,26 +225,6 @@ const local = StyleSheet.create({
     color: "#8A94B8",
     fontSize: 14,
     textAlign: "center",
-  },
-
-  mockBox: {
-    marginTop: 30,
-    backgroundColor: "#10182A",
     paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 20,
-    alignSelf: "center",
-  },
-  mockText: {
-    color: "#8A94B8",
-    fontSize: 13,
-  },
-
-  apiText: {
-    marginTop: 20,
-    color: "#6C7A99",
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 120,
   },
 });
