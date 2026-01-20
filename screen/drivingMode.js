@@ -1,23 +1,38 @@
 import { useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { myStyle } from "../styles/myStyle";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { styles as myStyle } from "../styles/myStyle";
 
-export default function DrivingMode() {
-  const [mode, setMode] = useState("ECO"); // ECO | MANUAL
+import BottomNavBar from "../components/BottomNavBar";
+import HeaderBar from "../components/HeaderBar";
+
+/* ===== MODE THEME ===== */
+const MODE_THEME = {
+  ECO: {
+    color: "#35E1A1",
+    title: "ECO",
+    desc: "Eco Mode • ประหยัดพลังงาน • จำกัดความเร็ว • เน้น DTE",
+  },
+  MANUAL: {
+    color: "#FF3B30",
+    title: "MANUAL",
+    desc: "Manual Mode • ควบคุมเอง • ตอบสนองตรงมือ",
+  },
+};
+
+export default function DrivingMode({ navigation }) {
+  const [mode, setMode] = useState("ECO");
   const [holding, setHolding] = useState(false);
-
   const holdTimer = useRef(null);
 
-  const isEco = mode === "ECO";
+  const theme = MODE_THEME[mode];
 
-  /* ================= HOLD LOGIC ================= */
+  /* ===== HOLD LOGIC ===== */
   const handlePressIn = () => {
     setHolding(true);
-
     holdTimer.current = setTimeout(() => {
       setMode((prev) => (prev === "ECO" ? "MANUAL" : "ECO"));
       setHolding(false);
-    }, 3000);
+    }, 1000);
   };
 
   const handlePressOut = () => {
@@ -30,109 +45,115 @@ export default function DrivingMode() {
 
   return (
     <View style={myStyle.container}>
-      {/* HEADER */}
-      <Text style={styles.title}>Driving Mode</Text>
-      <Text style={styles.subtitle}>Press and hold 3 seconds to switch</Text>
+      {/* ===== HEADER BAR ===== */}
+      <HeaderBar title="Driving Mode" subtitle="Tap the button to toggle" />
 
-      {/* HOLD BUTTON */}
+      {/* ===== SWITCH BUTTON ===== */}
       <Pressable
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={[
-          styles.outerGlow,
-          { shadowColor: isEco ? "#35E1A1" : "#FF3B30" },
-        ]}
+        style={[local.glow, { shadowColor: theme.color }]}
       >
-        <View
-          style={[
-            styles.outerRing,
-            { borderColor: isEco ? "#35E1A1" : "#FF3B30" },
-          ]}
-        >
-          <View
-            style={[
-              styles.innerCore,
-              { backgroundColor: isEco ? "#35E1A1" : "#FF3B30" },
-            ]}
+        <View style={[local.ring, { borderColor: theme.color }]}>
+          <Image
+            source={require("../assets/Eco.png")}
+            style={[local.icon, { tintColor: theme.color }]}
+            resizeMode="contain"
           />
         </View>
 
-        <Text style={styles.tapText}>
-          {holding ? "HOLDING..." : "HOLD TO SWITCH"}
+        <Text style={local.tapText}>
+          {holding ? "HOLDING..." : "TAP TO SWITCH"}
         </Text>
       </Pressable>
 
-      {/* MODE INFO */}
-      <View style={{ marginTop: 30, alignItems: "center" }}>
-        <Text style={styles.modeTitle}>
-          โหมดปัจจุบัน: {isEco ? "ECO" : "MANUAL"}
+      {/* ===== MODE INFO ===== */}
+      <View style={local.infoWrap}>
+        <Text style={local.modeTitle}>
+          โหมดปัจจุบัน: {theme.title === "ECO" ? "ประหยัดพลังงาน" : "ควบคุมเอง"}
         </Text>
-
-        <Text style={styles.modeDesc}>
-          {isEco
-            ? "Eco Mode • ประหยัดพลังงาน • ควบคุมเสถียร"
-            : "Manual Mode • ควบคุมเอง • ตอบสนองตรงมือ"}
-        </Text>
+        <Text style={local.modeDesc}>{theme.desc}</Text>
       </View>
+
+      {/* ===== MOCK INFO ===== */}
+      <View style={local.mockBox}>
+        <Text style={local.mockText}>Haptic: vibrate on tap</Text>
+      </View>
+
+      {/* ===== BOTTOM NAVBAR ===== */}
+      <BottomNavBar active="Eco" navigation={navigation} />
     </View>
   );
 }
 
-/* ================= STYLES ================= */
-const styles = StyleSheet.create({
-  title: {
-    color: "#FFFFFF",
-    fontSize: 28,
-    fontWeight: "700",
-    marginTop: 20,
-  },
-  subtitle: {
-    color: "#8A94B8",
-    fontSize: 15,
-    marginTop: 6,
-    marginBottom: 40,
-  },
-
-  outerGlow: {
+/* ===== LOCAL STYLES ===== */
+const local = StyleSheet.create({
+  glow: {
     alignSelf: "center",
-    marginTop: 20,
+    marginTop: 40,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.7,
-    shadowRadius: 35,
+    shadowRadius: 40,
   },
-  outerRing: {
+  ring: {
     width: 260,
     height: 260,
     borderRadius: 130,
-    borderWidth: 8,
+    borderWidth: 10,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#0B1220",
   },
-  innerCore: {
+
+  icon: {
     width: 140,
     height: 140,
-    borderRadius: 70,
     opacity: 0.95,
   },
+
   tapText: {
     position: "absolute",
-    bottom: 28,
+    bottom: 24,
     alignSelf: "center",
     color: "#E6ECFF",
     fontWeight: "600",
     letterSpacing: 1,
   },
 
+  infoWrap: {
+    marginTop: 40,
+    alignItems: "center",
+  },
   modeTitle: {
     color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "700",
   },
   modeDesc: {
     marginTop: 8,
     color: "#8A94B8",
     fontSize: 14,
     textAlign: "center",
+  },
+
+  mockBox: {
+    marginTop: 30,
+    backgroundColor: "#101B30",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+    alignSelf: "center",
+  },
+  mockText: {
+    color: "#8A94B8",
+    fontSize: 13,
+  },
+
+  apiText: {
+    marginTop: 20,
+    color: "#6C7A99",
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: 120,
   },
 });
