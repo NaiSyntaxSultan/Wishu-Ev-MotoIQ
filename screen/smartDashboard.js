@@ -1,5 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { styles } from "../styles/myStyle";
 
 import BottomNavBar from "../components/BottomNavBar";
@@ -8,18 +16,46 @@ import CircleGauge from "../components/CircleGauge";
 import HeaderBar from "../components/HeaderBar";
 import MiniCard from "../components/MiniCard";
 
+import { getLocalUser } from "../services/sqlite-service";
+
 export default function SmartDashboard({ navigation }) {
-  const speed = 32;
-  const battery = 78;
-  const distance = 45;
-  const online = true;
+  const [user, setUser] = useState(null);
+  const [speed, setSpeed] = useState(0);
+  const [battery, setBattery] = useState(78);
+  const [distance, setDistance] = useState(45);
+  const [online, setOnline] = useState(true);
+
+  // ดึงชื่อผู้ใช้จาก SQLite
+  useFocusEffect(
+    useCallback(() => {
+      const userData = getLocalUser();
+      if (userData) setUser(userData);
+    }, []),
+  );
+
+  // จำลองการทำงาน
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSpeed((prev) => {
+        const next = prev + (Math.random() * 8 - 3);
+        return Math.max(0, Math.min(100, Math.floor(next)));
+      });
+      setBattery((prev) => Math.max(0, prev - 0.02));
+
+      // AI DTE Logic
+      setDistance(Math.floor(battery * 0.6));
+    }, 100);
+    return () => clearInterval(interval);
+  }, [battery]);
 
   return (
     <View style={styles.container}>
       {/* ===== HEADER ===== */}
       <HeaderBar
         title="Smart Dashboard"
-        subtitle="Real-time • AI DTE"
+        subtitle={
+          user ? `Rider: ${user.fullname.split(" ")[0]}` : "Real-time • AI DTE"
+        }
         showNotification
         notificationCount={2}
       />
@@ -40,7 +76,7 @@ export default function SmartDashboard({ navigation }) {
           />
 
           <View style={styles.row}>
-            <MiniCard title="Battery" value={`${battery}%`} />
+            <MiniCard title="Battery" value={`${Math.floor(battery)}%`} />
             <MiniCard
               title="Connection"
               value={online ? "Online" : "Offline"}
@@ -89,7 +125,7 @@ export default function SmartDashboard({ navigation }) {
 }
 
 /* ===== LOCAL STYLES ===== */
-const local = {
+const local = StyleSheet.create({
   ecoButton: {
     alignSelf: "center",
     marginTop: 24,
@@ -115,4 +151,4 @@ const local = {
     fontWeight: "800",
     letterSpacing: 0.5,
   },
-};
+});

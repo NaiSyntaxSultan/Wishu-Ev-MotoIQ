@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +15,9 @@ import BottomNavBar from "../components/BottomNavBar";
 import Card from "../components/Card";
 import HeaderBar from "../components/HeaderBar";
 import MiniCard from "../components/MiniCard";
+
+import { addCloudTrip } from "../services/firebase-service";
+import { getLocalUser } from "../services/sqlite-service";
 
 /* ================= UTILS ================= */
 const toRad = (v) => (v * Math.PI) / 180;
@@ -51,6 +55,8 @@ export default function GPSTracking({ navigation }) {
 
   const [expandedTripId, setExpandedTripId] = useState(null);
 
+  const [startTime, setStartTime] = useState(null);
+
   /* ================= PERMISSION ================= */
   useEffect(() => {
     (async () => {
@@ -69,6 +75,7 @@ export default function GPSTracking({ navigation }) {
     let subscription;
 
     if (tracking) {
+      setStartTime(new Date());
       subscription = Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
@@ -105,18 +112,41 @@ export default function GPSTracking({ navigation }) {
   };
 
   const saveTrip = async () => {
-    if (route.length < 2) return;
+    if (route.length < 2) {
+      setTracking(false);
+      setRoute([]);
+      return;
+    }
+    const endTime = new Date();
+    const tripId = Date.now().toString();
 
     const trip = {
-      id: Date.now().toString(),
-      date: new Date().toLocaleString(),
+      id: tripId,
+      date: endTime.toLocaleString(),
       distance: distance.toFixed(2),
       route,
+      start_time: startTime ? startTime.toISOString() : null,
+      end_time: endTime.toISOString(),
     };
 
     const updated = [trip, ...history];
     setHistory(updated);
     await AsyncStorage.setItem("tripHistory", JSON.stringify(updated));
+
+    // ส่งข้อมูลสรุปขึ้น Firebase
+    const user = getLocalUser();
+    if (user) {
+      await addCloudTrip({
+        student_id: user.student_id,
+        vehicle_id: "EV-01",
+        start_time: trip.start_time,
+        end_time: trip.end_time,
+        distance_km: parseFloat(trip.distance),
+        route_points: route.length,
+      });
+    }
+
+    Alert.alert("Saved & Synced", "Trip saved locally and synced to cloud.");
 
     setTracking(false);
     setRoute([]);

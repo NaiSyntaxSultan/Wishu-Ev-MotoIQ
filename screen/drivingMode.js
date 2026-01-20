@@ -13,6 +13,9 @@ import { styles as myStyle } from "../styles/myStyle";
 import BottomNavBar from "../components/BottomNavBar";
 import HeaderBar from "../components/HeaderBar";
 
+import { addCloudDrivingLog } from "../services/firebase-service";
+import { getLocalUser } from "../services/sqlite-service";
+
 /* ===== MODE THEME ===== */
 const MODE_THEME = {
   ECO: {
@@ -103,7 +106,7 @@ export default function DrivingMode({ navigation }) {
   };
 
   /* ===== SWITCH MODE FEEDBACK ===== */
-  const switchMode = () => {
+  const switchMode = async () => {
     Animated.sequence([
       Animated.spring(pressScale, {
         toValue: 1.1,
@@ -115,8 +118,24 @@ export default function DrivingMode({ navigation }) {
       }),
     ]).start();
 
-    setMode((prev) => (prev === "ECO" ? "MANUAL" : "ECO"));
+    const previousMode = mode;
+    const newMode = mode === "ECO" ? "MANUAL" : "ECO";
+
+    setMode(newMode);
     setHolding(false);
+
+    // Log การเปลี่ยนโหมด
+    try {
+      const user = getLocalUser();
+      await addCloudDrivingLog({
+        student_id: user?.student_id || "guest",
+        mode_from: previousMode,
+        mode_to: newMode,
+      });
+      console.log(`[Mode Switched] ${previousMode} -> ${newMode}`);
+    } catch (error) {
+      console.error("Failed to log mode switch:", error);
+    }
   };
 
   /* ===== DERIVED STYLES ===== */

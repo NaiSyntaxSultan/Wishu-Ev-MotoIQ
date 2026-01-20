@@ -1,15 +1,21 @@
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
   getDocs,
+  limit,
+  orderBy,
   query,
   updateDoc,
-  where
+  where,
 } from "firebase/firestore";
 import { firestore } from "../config/firebase-config";
 
 const USERS_COLLECTION = "user_profile";
+const TRIPS_COLLECTION = "trips";
+const ALERTS_COLLECTION = "vehicle_alerts";
+const DRIVING_LOGS_COLLECTION = "driving_mode_logs";
 
 export const checkStudentOnFirebase = async (studentId) => {
   try {
@@ -68,5 +74,47 @@ export const deleteCloudUser = async (firebaseId) => {
     console.log("Cloud Account Deleted");
   } catch (error) {
     console.error("Cloud Delete Error:", error);
+  }
+};
+
+// Trips
+export const addCloudTrip = async (tripData) => {
+  try {
+    await addDoc(collection(firestore, TRIPS_COLLECTION), {
+      ...tripData,
+      syncedAt: new Date(),
+    });
+    console.log("Trip Saved to Cloud");
+  } catch (error) {
+    console.error("Trip Sync Error:", error);
+  }
+};
+
+// Driving Mode Logs
+export const addCloudDrivingLog = async (modeData) => {
+  try {
+    await addDoc(collection(firestore, DRIVING_LOGS_COLLECTION), {
+      ...modeData,
+      timestamp: new Date(),
+    });
+    console.log("Mode Logged");
+  } catch (error) {
+    console.error("Mode Log Error:", error);
+  }
+};
+
+// Alerts
+export const getCloudAlerts = async () => {
+  try {
+    const q = query(
+      collection(firestore, ALERTS_COLLECTION),
+      orderBy("timestamp", "desc"),
+      limit(10),
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Get Alerts Error:", error);
+    return [];
   }
 };

@@ -1,10 +1,22 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import BottomNavBar from "../components/BottomNavBar";
 import Card from "../components/Card";
 import HeaderBar from "../components/HeaderBar";
 import { styles as myStyle } from "../styles/myStyle";
 
+import { getCloudAlerts } from "../services/firebase-service";
+
 /* ===== Mock Data ===== */
+//ส่วนนี้ใช้ Mock ไปก่อนสำหรับการแสดงผล Real-time sensor
 const STATUS_LIST = [
   {
     id: "motor",
@@ -36,31 +48,47 @@ const STATUS_LIST = [
   },
 ];
 
-const ALERT_LOG = [
-  {
-    id: "1",
-    level: "CRITICAL",
-    title: "กระแสสูงผิดปกติ",
-    desc: "ตรวจพบเมื่อ 2 นาทีที่แล้ว",
-    color: "#FF6B6B",
-  },
-  {
-    id: "2",
-    level: "WARNING",
-    title: "แรงดันแบตใกล้ต่ำ",
-    desc: "ตรวจพบเมื่อ 10 นาทีที่แล้ว",
-    color: "#F5C76A",
-  },
-  {
-    id: "3",
-    level: "INFO",
-    title: "พฤติกรรมขับขี่ปลอดภัย",
-    desc: "ตรวจพบเมื่อ 1 ชม.ที่แล้ว",
-    color: "#7C8DB5",
-  },
-];
+// ฟังก์ชันช่วยแปลงวันที่จาก Firebase Timestamp
+const formatDate = (timestamp) => {
+  if (!timestamp) return "";
+  if (timestamp.seconds) {
+    return new Date(timestamp.seconds * 1000).toLocaleString("th-TH", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  return new Date(timestamp).toLocaleString();
+};
 
 export default function HealthAndAlerts({ navigation }) {
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = async () => {
+    try {
+      const data = await getCloudAlerts();
+      setAlerts(data);
+    } catch (error) {
+      console.log("Fetch error:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, []),
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadData();
+  };
   return (
     <View style={myStyle.container}>
       <HeaderBar
@@ -71,6 +99,13 @@ export default function HealthAndAlerts({ navigation }) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#35E1A1"
+          />
+        }
       >
         {/* ===== Status List ===== */}
         <Card>
@@ -91,7 +126,6 @@ export default function HealthAndAlerts({ navigation }) {
                   <Text style={local.statusValue}>{item.value}</Text>
                 </View>
               </View>
-
               <Text style={[local.statusBadge, { color: item.color }]}>
                 {item.status}
               </Text>
@@ -99,35 +133,61 @@ export default function HealthAndAlerts({ navigation }) {
           ))}
         </Card>
 
-        {/* ===== Alert Log ===== */}
+        {/* ===== Alert Log (Real Data) ===== */}
         <Card>
           <View style={local.sectionHeader}>
             <Text style={local.sectionTitle}>Alert Log</Text>
-            <Text style={local.sectionSub}>history</Text>
+            <Text style={local.sectionSub}>Cloud History</Text>
           </View>
 
-          {ALERT_LOG.map((item) => (
-            <View
-              key={item.id}
-              style={[local.alertItem, { borderColor: item.color }]}
+          {loading && !refreshing ? (
+            <ActivityIndicator
+              size="small"
+              color="#35E1A1"
+              style={{ marginVertical: 20 }}
+            />
+          ) : alerts.length === 0 ? (
+            <Text
+              style={{
+                color: "#7C8DB5",
+                textAlign: "center",
+                marginVertical: 20,
+              }}
             >
-              <View
-                style={[
-                  local.alertBadge,
-                  { backgroundColor: `${item.color}22` },
-                ]}
-              >
-                <Text style={[local.alertLevel, { color: item.color }]}>
-                  {item.level}
-                </Text>
-              </View>
+              No alerts history found.
+            </Text>
+          ) : (
+            alerts.map((item, index) => {
+              let badgeColor = "#7C8DB5"; // INFO (สีเทา)
+              if (item.severity_level === "WARNING") badgeColor = "#F5C76A"; // สีเหลือง
+              if (item.severity_level === "CRITICAL") badgeColor = "#FF6B6B"; // สีแดง
 
-              <View style={{ flex: 1 }}>
-                <Text style={local.alertTitle}>{item.title}</Text>
-                <Text style={local.alertDesc}>{item.desc}</Text>
-              </View>
-            </View>
-          ))}
+              return (
+                <View
+                  key={item.id || index}
+                  style={[local.alertItem, { borderColor: badgeColor }]}
+                >
+                  <View
+                    style={[
+                      local.alertBadge,
+                      { backgroundColor: badgeColor + "20" },
+                    ]}
+                  >
+                    <Text style={[local.alertLevel, { color: badgeColor }]}>
+                      {item.severity_level || "INFO"}
+                    </Text>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={local.alertTitle}>
+                      {item.alert_event || "System Alert"}
+                    </Text>
+                    <Text style={local.alertDesc}>{item.detail || "-"}</Text>
+                  </View>
+                </View>
+              );
+            })
+          )}
         </Card>
       </ScrollView>
 
