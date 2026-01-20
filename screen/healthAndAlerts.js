@@ -194,7 +194,7 @@ const local = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     marginBottom: 10,
-    backgroundColor: "#0B1326",
+    backgroundColor: "#10182A",
   },
   alertBadge: {
     paddingHorizontal: 10,
@@ -223,7 +223,7 @@ const local = StyleSheet.create({
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
-    backgroundColor: "#0B1326",
+    backgroundColor: "#10182A",
     marginBottom: 12,
   },
 });

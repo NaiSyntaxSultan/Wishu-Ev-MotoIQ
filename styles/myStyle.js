@@ -4,7 +4,7 @@ export const styles = StyleSheet.create({
   /* ================= BASE ================= */
   container: {
     flex: 1,
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
   },
 
   content: {
@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#121C2E",
+    backgroundColor: "#10182A",
     borderRadius: 28,
     padding: 24,
     marginBottom: 20,
