@@ -191,7 +191,7 @@ export default function GPSTracking({ navigation }) {
         </View>
 
         {/* CONTROLS */}
-        <Card style={{ marginHorizontal: 16 }}>
+        <Card style={{ marginHorizontal: 16, marginTop: 20 }}>
           <TouchableOpacity
             style={[
               styles.btn,
@@ -235,13 +235,13 @@ export default function GPSTracking({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0B1220",
+    backgroundColor: "#10182A ",
   },
   map: {
     height: 320,

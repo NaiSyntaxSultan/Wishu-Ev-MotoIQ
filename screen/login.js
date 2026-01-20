@@ -254,7 +254,7 @@ const loginStyles = StyleSheet.create({
   mainCard: {
     marginTop: 40,
     marginHorizontal: 20,
-    backgroundColor: "#121C2E",
+    backgroundColor: "#10182A",
     borderRadius: 24,
     padding: 24,
     alignItems: "center",
@@ -263,7 +263,7 @@ const loginStyles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 20,
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
@@ -283,7 +283,7 @@ const loginStyles = StyleSheet.create({
   howCard: {
     marginTop: 30,
     marginHorizontal: 20,
-    backgroundColor: "#121C2E",
+    backgroundColor: "#10182A",
     borderRadius: 20,
     padding: 20,
   },
@@ -297,7 +297,7 @@ const loginStyles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 14,
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
     marginBottom: 10,
   },
   stepText: {

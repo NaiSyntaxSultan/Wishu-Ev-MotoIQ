@@ -213,13 +213,14 @@ export default function ProfileAndPrivacy({ navigation }) {
 /* ===== STYLES ===== */
 const local = StyleSheet.create({
   card: {
-    backgroundColor: "#0E1627",
+    backgroundColor: "#10182A",
     borderRadius: 22,
     padding: 20,
     marginBottom: 20,
+    marginHorizontal: 10,
   },
   innerCard: {
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
     borderRadius: 16,
     padding: 16,
     marginTop: 12,
@@ -238,7 +239,7 @@ const local = StyleSheet.create({
     color: "#EAF0FF",
   },
   valueCard: {
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
     borderRadius: 16,
     padding: 14,
   },
@@ -319,7 +320,7 @@ const local = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "#00000099",
     justifyContent: "center",
     alignItems: "center",
   },

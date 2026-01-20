@@ -102,7 +102,7 @@ const local = StyleSheet.create({
     borderWidth: 10,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0B1220",
+    backgroundColor: "#0B0F1A",
   },
 
   icon: {
@@ -138,7 +138,7 @@ const local = StyleSheet.create({
 
   mockBox: {
     marginTop: 30,
-    backgroundColor: "#101B30",
+    backgroundColor: "#10182A",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 20,
