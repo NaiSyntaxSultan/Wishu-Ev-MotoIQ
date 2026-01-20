@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -12,44 +14,117 @@ import BottomNavBar from "../components/BottomNavBar";
 import HeaderBar from "../components/HeaderBar";
 import { styles as myStyle } from "../styles/myStyle";
 
+import { deleteCloudUser, updateCloudUser } from "../services/firebase-service";
+import {
+  getLocalUser,
+  logoutLocalUser,
+  updateLocalUserProfile,
+} from "../services/sqlite-service";
+
 export default function ProfileAndPrivacy({ navigation }) {
-  const ACCOUNT_NAME = "Ping W.";
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [fullName, setFullName] = useState(ACCOUNT_NAME);
-  const [phone, setPhone] = useState("081-234-5678");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [vehicleName, setVehicleName] = useState("EV-01");
   const isConnected = !!vehicleName;
 
   const [confirmName, setConfirmName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const canDelete = confirmName === ACCOUNT_NAME;
+  const canDelete = currentUser && confirmName === currentUser.fullname;
+
+  // โหลดข้อมูลเมื่อเปิดหน้าจอ
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = () => {
+    const user = getLocalUser();
+    if (user) {
+      setCurrentUser(user);
+      setFullName(user.fullname);
+      setPhone(user.emergency_phone);
+      console.log("Profile Loaded:", user.fullname);
+    }
+  };
 
   /* ===== ACTIONS ===== */
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!currentUser) return;
+    setLoading(true);
+    updateLocalUserProfile(fullName, phone, currentUser.profile_image_uri);
+    if (currentUser.firebase_id) {
+      await updateCloudUser(currentUser.firebase_id, {
+        fullname: fullName,
+        emergency_phone: phone,
+      });
+    }
     setIsEditing(false);
-    // TODO: call API save profile
+    setLoading(false);
+    loadUserProfile();
+    Alert.alert("Success", "Profile updated successfully!");
   };
 
   const handleLogout = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
+    Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: () => {
+          logoutLocalUser();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Login" }],
+          });
+        },
+      },
+    ]);
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
     setShowDeleteModal(false);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
+    setLoading(true);
+
+    try {
+      if (currentUser.firebase_id) {
+        await deleteCloudUser(currentUser.firebase_id);
+      }
+
+      logoutLocalUser();
+
+      Alert.alert(
+        "Account Deleted",
+        "Your account has been permanently deleted.",
+        [
+          {
+            text: "Bye",
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "Login" }],
+              });
+            },
+          },
+        ],
+      );
+    } catch (error) {
+      Alert.alert("Error", "Could not delete account. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUnbind = () => {
-    setVehicleName(null);
+    Alert.alert("Unbind Vehicle", "Disconnect from EV-01?", [
+      { text: "Cancel" },
+      { text: "Disconnect", onPress: () => setVehicleName(null) },
+    ]);
   };
 
   return (
@@ -57,6 +132,14 @@ export default function ProfileAndPrivacy({ navigation }) {
       <HeaderBar title="Profile & Privacy" subtitle="My Data, My Control" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
+        {/* Loading Indicator */}
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            color="#35E1A1"
+            style={{ marginBottom: 20 }}
+          />
+        )}
         {/* ===== EDIT PROFILE ===== */}
         <View style={local.card}>
           <View style={local.rowBetween}>
@@ -176,7 +259,7 @@ export default function ProfileAndPrivacy({ navigation }) {
           <View style={local.modalBox}>
             <Text style={local.dangerTitle}>Confirm Delete</Text>
             <Text style={local.dangerDesc}>
-              Type "{ACCOUNT_NAME}" to confirm
+              Type "{currentUser?.fullname}" to confirm
             </Text>
 
             <TextInput
