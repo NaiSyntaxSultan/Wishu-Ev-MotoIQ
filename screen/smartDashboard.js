@@ -1,4 +1,5 @@
-import { ScrollView, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { styles } from "../styles/myStyle";
 
 import BottomNavBar from "../components/BottomNavBar";
@@ -15,6 +16,7 @@ export default function SmartDashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* ===== HEADER ===== */}
       <HeaderBar
         title="Smart Dashboard"
         subtitle="Real-time • AI DTE"
@@ -22,11 +24,14 @@ export default function SmartDashboard({ navigation }) {
         notificationCount={2}
       />
 
+      {/* ===== CONTENT ===== */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={{
+          paddingBottom: 160, // กันชน BottomNavBar
+        }}
       >
-        {/* SPEED CARD */}
+        {/* ===== SPEED CARD ===== */}
         <Card>
           <CircleGauge
             value={speed}
@@ -39,11 +44,12 @@ export default function SmartDashboard({ navigation }) {
             <MiniCard
               title="Connection"
               value={online ? "Online" : "Offline"}
+              status={online ? "success" : "danger"}
             />
           </View>
         </Card>
 
-        {/* DTE */}
+        {/* ===== DTE ===== */}
         <Card>
           <Text style={styles.sectionTitle}>AI DTE (Distance-to-Empty)</Text>
 
@@ -54,17 +60,59 @@ export default function SmartDashboard({ navigation }) {
           </Text>
         </Card>
 
-        {/* INFO */}
+        {/* ===== COLOR INFO ===== */}
         <Card>
           <Text style={styles.info}>
-            Color cue: <Text style={{ color: "#4DB6FF" }}>Blue</Text> = Normal •{" "}
-            <Text style={{ color: "#FF9F0A" }}>Orange</Text> = Low battery
-            warning
+            Color cue:{" "}
+            <Text style={{ color: "#4DB6FF", fontWeight: "600" }}>Blue</Text> =
+            Normal •{" "}
+            <Text style={{ color: "#FF9F0A", fontWeight: "600" }}>Orange</Text>{" "}
+            = Low battery warning
           </Text>
         </Card>
+
+        {/* ===== ECO BUTTON (ใต้ Color cue) ===== */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={local.ecoButton}
+          onPress={() => navigation.navigate("DrivingMode")}
+        >
+          <Ionicons name="leaf" size={26} color="#05160F" />
+          <Text style={local.ecoText}>Eco Mode</Text>
+        </TouchableOpacity>
       </ScrollView>
 
+      {/* ===== BOTTOM NAV ===== */}
       <BottomNavBar active="Dashboard" navigation={navigation} />
     </View>
   );
 }
+
+/* ===== LOCAL STYLES ===== */
+const local = {
+  ecoButton: {
+    alignSelf: "center",
+    marginTop: 24,
+    width: 150,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#35E1A1",
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+
+    shadowColor: "#35E1A1",
+    shadowOpacity: 0.6,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
+  },
+  ecoText: {
+    color: "#05160F",
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 0.5,
+  },
+};

@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 export default function BottomNavBar({ active, navigation }) {
   const tabs = [
     { key: "Dashboard", icon: "speedometer", screen: "Dashboard" },
-    { key: "Eco", icon: "leaf", screen: "DrivingMode" },
+    // { key: "Eco", icon: "leaf", screen: "DrivingMode" },
     { key: "Map", icon: "map", screen: "GPS" },
     { key: "Alerts", icon: "alert-circle", screen: "Alerts" },
     { key: "More", icon: "menu", screen: "Profile" },
