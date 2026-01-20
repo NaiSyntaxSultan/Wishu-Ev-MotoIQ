@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCameraPermissions } from "expo-camera";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,11 +14,25 @@ import {
 import ScanCamera from "../components/ScanCamera";
 import { styles as myStyle } from "../styles/myStyle";
 
+import { checkStudentOnFirebase } from "../services/firebase-service";
+import { getLocalUser, saveLocalUser } from "../services/sqlite-service";
+
 export default function Login({ navigation }) {
   const [mode, setMode] = useState("login");
   const [scanned, setScanned] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [permission, requestPermission] = useCameraPermissions();
+
+  // ตรวจสอบว่าเคยล็อกอินค้างไว้ไหม
+  useEffect(() => {
+    const existingUser = getLocalUser();
+    if (existingUser) {
+      console.log("Auto-Login Active for:", existingUser.fullname);
+      // ถ้ามีข้อมูลอยู่แล้ว ให้ข้ามไป Dashboard เลย
+      navigation.replace("Dashboard");
+    }
+  }, []);
 
   useEffect(() => {
     if (mode === "scan" && permission?.granted === false) {
@@ -24,12 +40,52 @@ export default function Login({ navigation }) {
     }
   }, [mode, permission]);
 
-  const handleBarCodeScanned = ({ data }) => {
+  const handleBarCodeScanned = async ({ data }) => {
     if (scanned) return;
 
     setScanned(true);
+    setLoading(true);
     console.log("Student ID:", data);
-    navigation.replace("Dashboard");
+
+    const userData = await checkStudentOnFirebase(data);
+
+    if (userData) {
+      const userToSave = {
+        student_id: userData.student_id,
+        fullname: userData.fullname,
+        emergency_phone: userData.emergency_phone || "",
+        profile_image_uri: userData.profile_image_uri || null,
+        firebase_id: userData.firebase_id,
+      };
+
+      // บันทึกลงเครื่อง SQLite
+      const success = saveLocalUser(userToSave);
+
+      if (success) {
+        setLoading(false);
+        Alert.alert("Authorized", `Welcome, ${userToSave.fullname}`, [
+          {
+            text: "Start Engine",
+            onPress: () => navigation.replace("Dashboard"),
+          },
+        ]);
+      } else {
+        setLoading(false);
+        Alert.alert("Error", "Failed to save user data locally.");
+        setScanned(false);
+      }
+    } else {
+      setLoading(false);
+      Alert.alert("Access Denied ", "Student ID not found in database.", [
+        {
+          text: "Try Again",
+          onPress: () => {
+            setScanned(false);
+            setMode("login");
+          },
+        },
+      ]);
+    }
   };
 
   // ================= SCAN MODE =================
@@ -72,14 +128,43 @@ export default function Login({ navigation }) {
     }
 
     return (
-      <ScanCamera
-        scanned={scanned}
-        onScanned={handleBarCodeScanned}
-        onCancel={() => {
-          setScanned(false);
-          setMode("login");
-        }}
-      />
+      <View style={{ flex: 1 }}>
+        <ScanCamera
+          scanned={scanned}
+          onScanned={handleBarCodeScanned}
+          onCancel={() => {
+            setScanned(false);
+            setMode("login");
+          }}
+        />
+
+        {loading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.6)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ActivityIndicator size="large" color="#35E1A1" />
+            <Text
+              style={{
+                color: "white",
+                marginTop: 15,
+                fontSize: 16,
+                fontWeight: "bold",
+              }}
+            >
+              Verifying Access...
+            </Text>
+          </View>
+        )}
+      </View>
     );
   }
 
